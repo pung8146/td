@@ -1,54 +1,77 @@
-# tdlogin.py
-
 import os
-import tdjson
+import sys
 import time
+sys.path.insert(0, os.path.abspath('.'))
+import tdjson
 
-# ✅ TDLib 빌드 후 생성된 .dylib 경로
-TDJSON_PATH = os.path.abspath("../tdlib/lib/libtdjson.dylib")
+print("=== TDLib Python Login ===")
+print("텔레그램 API 자격증명이 필요합니다.")
+print("https://my.telegram.org 에서 api_id와 api_hash를 발급받으세요.")
 
-# ✅ 자신의 api_id, api_hash 입력
-API_ID = 1234567
-API_HASH = "your_api_hash_here"
+# API 자격증명을 여기에 직접 입력하세요
+api_id = ***REMOVED***  # 여기에 본인의 API ID를 입력
+api_hash = "***REMOVED***"  # 여기에 본인의 API Hash를 입력
+phone_number = "+821022748146"  # 여기에 본인의 전화번호를 입력
 
-# ✅ 텔레그램에 등록된 전화번호
-PHONE_NUMBER = "+821012345678"
+print(f"Using API ID: {api_id}")
+print(f"Using Phone: {phone_number}")
 
-client = tdjson.TdJson(lib_path=TDJSON_PATH)
-client.execute({'@type': 'setLogVerbosityLevel', 'new_verbosity_level': 1})
-client.execute({'@type': 'setTdlibParameters', 'parameters': {
-    'database_directory': 'tdlib-db',
-    'use_message_database': True,
-    'use_secret_chats': False,
-    'api_id': API_ID,
-    'api_hash': API_HASH,
-    'system_language_code': 'en',
-    'device_model': 'iMac',
-    'application_version': '0.1',
-    'enable_storage_optimizer': True,
-    'use_test_dc': False
-}})
-client.execute({'@type': 'checkDatabaseEncryptionKey', 'encryption_key': ''})
+client = tdjson.create()
 
-# 🔐 전화번호 제출
-client.send({'@type': 'setAuthenticationPhoneNumber', 'phone_number': PHONE_NUMBER})
+# 먼저 TDLib 파라미터를 설정
+print("Setting TDLib parameters...")
+client.send({
+    "@type": "setTdlibParameters",
+    "database_directory": "tdlib-db",
+    "use_message_database": True,
+    "use_secret_chats": False,
+    "api_id": api_id,
+    "api_hash": api_hash,
+    "system_language_code": "ko",
+    "device_model": "macOS",
+    "application_version": "1.0",
+    "enable_storage_optimizer": True,
+    "use_test_dc": False
+})
 
+# 응답을 기다린 후 다음 단계로 진행
+print("Waiting for authorization state...")
 while True:
-    r = client.receive()
-    if r:
-        print(r)
-
-        if r.get('@type') == 'updateAuthorizationState':
-            auth_state = r['authorization_state']['@type']
-
-            if auth_state == 'authorizationStateWaitCode':
-                code = input("Enter the code you received via Telegram: ")
-                client.send({'@type': 'checkAuthenticationCode', 'code': code})
-
-            elif auth_state == 'authorizationStateReady':
-                print("✅ Logged in successfully!")
+    result = client.receive()
+    if result:
+        print(f"Received: {result}")
+        
+        if result.get("@type") == "updateAuthorizationState":
+            state = result["authorization_state"]["@type"]
+            print(f"Authorization state: {state}")
+            
+            if state == "authorizationStateWaitTdlibParameters":
+                # 이미 파라미터를 설정했으므로 다음 상태로 넘어갈 것
+                continue
+                
+            elif state == "authorizationStateWaitPhoneNumber":
+                print("Phone number required. Sending phone number...")
+                client.send({"@type": "setAuthenticationPhoneNumber", "phone_number": phone_number})
+                
+            elif state == "authorizationStateWaitCode":
+                code = input("인증 코드를 입력하세요: ")
+                client.send({"@type": "checkAuthenticationCode", "code": code})
+                
+            elif state == "authorizationStateReady":
+                print("✅ 로그인 성공!")
                 break
+                
+            elif state == "authorizationStateClosed":
+                print("❌ 인증 실패")
+                break
+                
+        elif result.get("@type") == "error":
+            print(f"❌ Error: {result}")
+            if "setTdlibParameters" in str(result):
+                print("TDLib parameters already set, continuing...")
+                continue
+            break
+    
+    time.sleep(0.1)
 
-    time.sleep(0.5)
-
-client.close()
+client.destroy()
