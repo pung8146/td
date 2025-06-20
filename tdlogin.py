@@ -8,10 +8,22 @@ print("=== TDLib Python Login ===")
 print("텔레그램 API 자격증명이 필요합니다.")
 print("https://my.telegram.org 에서 api_id와 api_hash를 발급받으세요.")
 
-# API 자격증명을 여기에 직접 입력하세요
-api_id = 20726186  # 여기에 본인의 API ID를 입력
-api_hash = "7d5e8f24ee48a20a50ff864cd611d5d7"  # 여기에 본인의 API Hash를 입력
-phone_number = "+821022748146"  # 여기에 본인의 전화번호를 입력
+# 환경변수에서 API 자격증명을 읽어옵니다
+api_id = os.getenv('TELEGRAM_API_ID')
+api_hash = os.getenv('TELEGRAM_API_HASH')
+phone_number = os.getenv('TELEGRAM_PHONE_NUMBER')
+
+# 환경변수가 설정되지 않은 경우 사용자에게 안내
+if not api_id or not api_hash or not phone_number:
+    print("❌ 환경변수가 설정되지 않았습니다.")
+    print("다음 환경변수를 설정해주세요:")
+    print("export TELEGRAM_API_ID='your_api_id'")
+    print("export TELEGRAM_API_HASH='your_api_hash'")
+    print("export TELEGRAM_PHONE_NUMBER='your_phone_number'")
+    sys.exit(1)
+
+# 문자열을 정수로 변환
+api_id = int(api_id)
 
 print(f"Using API ID: {api_id}")
 print(f"Using Phone: {phone_number}")
