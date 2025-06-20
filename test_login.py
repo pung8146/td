@@ -7,8 +7,8 @@ import tdjson
 print("=== TDLib 로그인 상태 확인 ===")
 
 # API 자격증명
-api_id = ***REMOVED***
-api_hash = "***REMOVED***"
+api_id = 20726186
+api_hash = "7d5e8f24ee48a20a50ff864cd611d5d7"
 
 client = tdjson.create()
 

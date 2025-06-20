@@ -6,3 +6,6 @@ docs/
 /tdlib/
 vcpkg/
 .clang-tidy
+.env
+*.pyc
+__pycache__/

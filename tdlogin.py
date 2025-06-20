@@ -9,8 +9,8 @@ print("텔레그램 API 자격증명이 필요합니다.")
 print("https://my.telegram.org 에서 api_id와 api_hash를 발급받으세요.")
 
 # API 자격증명을 여기에 직접 입력하세요
-api_id = ***REMOVED***  # 여기에 본인의 API ID를 입력
-api_hash = "***REMOVED***"  # 여기에 본인의 API Hash를 입력
+api_id = 20726186  # 여기에 본인의 API ID를 입력
+api_hash = "7d5e8f24ee48a20a50ff864cd611d5d7"  # 여기에 본인의 API Hash를 입력
 phone_number = "+821022748146"  # 여기에 본인의 전화번호를 입력
 
 print(f"Using API ID: {api_id}")
